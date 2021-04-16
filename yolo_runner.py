@@ -145,7 +145,7 @@ for root, dirs, files in os.walk(indir):
         n_frames = 0
         while(cap.isOpened()):
             ret, frame = cap.read()
-            if not ret or n_frames == 5:
+            if not ret:
                 break
             n_frames += 1
             batch.append(frame)
@@ -162,3 +162,5 @@ for root, dirs, files in os.walk(indir):
         with open(_outpath, 'w') as f:
             for frame in out:
                 f.write(str(frame) + "\n")
+
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/val30cut1 /results/jxli/ActivityNet/data/val30cutyolo1 64
