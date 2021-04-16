@@ -15,7 +15,9 @@ import os
 # " The child sets the mop down and plays with her family member.", 
 # " The child walks into the bedroom area and continues to mop the floor."]}
 
-# p slice.py ../dataset/train.json train30 train30cut
+# srun
+# singularity shell --nv /projects/singularity/images/Multisense.img 
+
 
 parser = argparse.ArgumentParser(description="Script to slice videos between certain timestamps")
 parser.add_argument('path', type=str, help='path of an ActivityNet json')
@@ -45,4 +47,3 @@ with open(out + '.sh', 'w') as f:
     for key in convert_these:
         for idx, (l, r) in enumerate(labels[key]['timestamps']):
             f.write(f"ffmpeg -i {indir}/{key}_30.mp4 -ss {l} -to {r} {outdir}/{key}_30_{idx}.mp4\n")
-            f.write('\n')
