@@ -7,7 +7,9 @@ import numpy as np
 
 # /results/jxli/concepts/weights/yolov4_-1_3_608_608_dynamic.onnx
 # IN  >>> /results/jxli/ActivityNet/data/{test30cut, val30cut1, val30cut2}
-# OUT >>> /results/jxli/ActivityNet/data/{test30cutYOLO, val30cut1YOLO, val30cut2YOLO}
+# OUT >>> /results/jxli/ActivityNet/data/{test30cutyolo, val30cut1yolo, val30cut2yolo}
+# run -p gpu_long --mem=10000 --gres=gpu:1 --pty bash
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
 
 parser = argparse.ArgumentParser(description="Script to run YOLOv4 on videos")
 parser.add_argument('onnxpath', type=str, help='Onnx yolov4 file')
@@ -35,13 +37,14 @@ def inferbatch(batch):
     """
     global session, IN_IMAGE_H, IN_IMAGE_W, input_name
     batch = [cv2.cvtColor(cv2.resize(img, (IN_IMAGE_W, IN_IMAGE_H),
-                                         interpolation=cv2.INTER_LINEAR), cv2.COLOR_BGR2RGB) for img in batch]
+                                     interpolation=cv2.INTER_LINEAR), cv2.COLOR_BGR2RGB) for img in batch]
     batch = np.stack(batch)
     batch = np.transpose(batch, (0, 3, 1, 2)).astype(np.float32)
     batch /= 255.0
     outputs = session.run(None, {input_name: batch})
     HOLD = post_processing(0.4, 0.6, outputs)
     return HOLD
+
 
 def nms_cpu(boxes, confs, nms_thresh=0.5, min_mode=False):
     # print(boxes.shape)
@@ -76,8 +79,9 @@ def nms_cpu(boxes, confs, nms_thresh=0.5, min_mode=False):
 
         inds = np.where(over <= nms_thresh)[0]
         order = order[inds + 1]
-    
+
     return np.array(keep)
+
 
 def post_processing(conf_thresh, nms_thresh, output):
     box_array, confs = output
@@ -98,7 +102,7 @@ def post_processing(conf_thresh, nms_thresh, output):
 
     bboxes_batch = []
     for i in range(box_array.shape[0]):
-       
+
         argwhere = max_conf[i] > conf_thresh
         l_box_array = box_array[i, argwhere, :]
         l_max_conf = max_conf[i, argwhere]
@@ -114,31 +118,31 @@ def post_processing(conf_thresh, nms_thresh, output):
             ll_max_id = l_max_id[cls_argwhere]
 
             keep = nms_cpu(ll_box_array, ll_max_conf, nms_thresh)
-            
+
             if (keep.size > 0):
                 ll_box_array = ll_box_array[keep, :]
                 ll_max_conf = ll_max_conf[keep]
                 ll_max_id = ll_max_id[keep]
 
                 for k in range(ll_box_array.shape[0]):
-                    bboxes.append([ll_box_array[k, 0], ll_box_array[k, 1], ll_box_array[k, 2], ll_box_array[k, 3], ll_max_conf[k], ll_max_conf[k], ll_max_id[k]])
-        
+                    bboxes.append([ll_box_array[k, 0], ll_box_array[k, 1], ll_box_array[k, 2],
+                                   ll_box_array[k, 3], ll_max_conf[k], ll_max_conf[k], ll_max_id[k]])
+
         bboxes_batch.append(bboxes)
 
     return bboxes_batch
-    
 
+import os
+x = os.walk(indir)
 for root, dirs, files in os.walk(indir):
-    for filename in files:
-        # has format v_#########_30_i.mp4
-        vid_id = filename[2:13] # id is length 11
-        print(f"Processing video ID: {vid_id}")
+    for filename in sorted(files):
+        # filename has format v_12345678901_30_i.mp4
+        print(f"Processing video ID: {filename[2:13]}, segment {filename[17:-4]}")
         vidpath = os.path.join(root, filename)
-        if vidpath[-4:] != ".mp4": 
+        if vidpath[-4:] != ".mp4":
             print(f"File {vidpath} is not video. Skipping...")
-            continue # skip non-videos
-        
-        
+            continue  # skip non-videos
+
         cap = cv2.VideoCapture(vidpath)
         out = []
         batch = []
@@ -152,15 +156,14 @@ for root, dirs, files in os.walk(indir):
             if len(batch) == batchsize:
                 out += inferbatch(batch)
                 batch = []
-        
+
         if len(batch) != 0:
             out += inferbatch(batch)
+
+        assert n_frames == len(out)
         
-        # out = [[[1,2], [3.4444]], [[1,2], [3.4445]]]
-        _outpath = os.path.join(outdir, f"v_{vid_id}_yolo4.txt")
+        _outpath = os.path.join(outdir, f"{filename[:-4]}_yolo4.txt")
         print(f"Writing results of {n_frames} frames to {_outpath}")
         with open(_outpath, 'w') as f:
             for frame in out:
                 f.write(str(frame) + "\n")
-
-# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/val30cut1 /results/jxli/ActivityNet/data/val30cutyolo1 64
