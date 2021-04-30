@@ -10,6 +10,8 @@ import numpy as np
 # OUT >>> /results/jxli/ActivityNet/data/{test30cutyolo, val30cut1yolo, val30cut2yolo}
 # run -p gpu_long --mem=10000 --gres=gpu:1 --pty bash
 # p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
 
 parser = argparse.ArgumentParser(description="Script to run YOLOv4 on videos")
 parser.add_argument('onnxpath', type=str, help='Onnx yolov4 file')
@@ -18,9 +20,12 @@ parser.add_argument('indir', type=str,
                     help='path to the already cut 30 FPS videos')
 parser.add_argument('outdir', type=str, help='path to place YOLO detections')
 parser.add_argument('batchsize', type=str, help='YOLO batch size')
+parser.add_argument('worker', type=str, help='workeridx, [0, nworkers)')
+parser.add_argument('nworkers', type=str, help='number of workers')
 
 ARGS = parser.parse_args()
 onnxpath, indir, outdir, batchsize = ARGS.onnxpath, ARGS.indir, ARGS.outdir, int(ARGS.batchsize)
+workeridx, nworkers = int(ARGS.workeridx), int(ARGS.nworkers)
 
 print(onnxpath, indir, outdir, batchsize)
 
@@ -135,9 +140,14 @@ def post_processing(conf_thresh, nms_thresh, output):
 import os
 x = os.walk(indir)
 for root, dirs, files in os.walk(indir):
-    for filename in sorted(files):
+    nfiles = len(f)
+    numperworker = nfiles // nworkers
+    startidx = workeridx * numperworker
+    endidx = startidx + numperworker if workeridx != (nworkers - 1) else None
+    for vididx, filename in enumerate(sorted(files)[startidx:endidx], start=startidx):
         # filename has format v_12345678901_30_i.mp4
         print(f"Processing video ID: {filename[2:13]}, segment {filename[17:-4]}")
+        print(f"WorkerIDX: {workeridx}/{nworkers}, vididx: {vididx}, assignment:[{startidx}, {endidx})")
         vidpath = os.path.join(root, filename)
         if vidpath[-4:] != ".mp4":
             print(f"File {vidpath} is not video. Skipping...")
