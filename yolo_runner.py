@@ -137,8 +137,7 @@ def post_processing(conf_thresh, nms_thresh, output):
 
     return bboxes_batch
 
-import os
-x = os.walk(indir)
+
 for root, dirs, files in os.walk(indir):
     nfiles = len(f)
     numperworker = nfiles // nworkers
