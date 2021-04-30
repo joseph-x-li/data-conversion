@@ -11,7 +11,7 @@ import numpy as np
 # run -p gpu_long --mem=10000 --gres=gpu:1 --pty bash
 # p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
 # p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
-# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/val30cut1 /results/jxli/ActivityNet/data/val30cutyolo1 32 0 2
 
 parser = argparse.ArgumentParser(description="Script to run YOLOv4 on videos")
 parser.add_argument('onnxpath', type=str, help='Onnx yolov4 file')
@@ -20,7 +20,7 @@ parser.add_argument('indir', type=str,
                     help='path to the already cut 30 FPS videos')
 parser.add_argument('outdir', type=str, help='path to place YOLO detections')
 parser.add_argument('batchsize', type=str, help='YOLO batch size')
-parser.add_argument('worker', type=str, help='workeridx, [0, nworkers)')
+parser.add_argument('workeridx', type=str, help='workeridx, [0, nworkers)')
 parser.add_argument('nworkers', type=str, help='number of workers')
 
 ARGS = parser.parse_args()
