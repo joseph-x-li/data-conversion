@@ -9,9 +9,15 @@ import numpy as np
 # IN  >>> /results/jxli/ActivityNet/data/{test30cut, val30cut1, val30cut2}
 # OUT >>> /results/jxli/ActivityNet/data/{test30cutyolo, val30cut1yolo, val30cut2yolo}
 # run -p gpu_long --mem=10000 --gres=gpu:1 --pty bash
-# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
-# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32
-# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/val30cut1 /results/jxli/ActivityNet/data/val30cutyolo1 32 0 2
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32 0 7
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32 1 7
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32 2 7
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32 3 7
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32 4 7
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32 5 7
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/train30cut /results/jxli/ActivityNet/data/train30cutyolo 32 6 7
+
+# p yolo_runner.py ../concepts/weights/yolov4_-1_3_608_608_dynamic.onnx /results/jxli/ActivityNet/data/val30cut2 /results/jxli/ActivityNet/data/val30cutyolo2 32 1 2
 
 parser = argparse.ArgumentParser(description="Script to run YOLOv4 on videos")
 parser.add_argument('onnxpath', type=str, help='Onnx yolov4 file')
