@@ -139,7 +139,7 @@ def post_processing(conf_thresh, nms_thresh, output):
 
 
 for root, dirs, files in os.walk(indir):
-    nfiles = len(f)
+    nfiles = len(files)
     numperworker = nfiles // nworkers
     startidx = workeridx * numperworker
     endidx = startidx + numperworker if workeridx != (nworkers - 1) else None
